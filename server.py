@@ -16,8 +16,6 @@ def assemble_payload(data):
 
 def read_data(client, expect):
     data=client.recv(expect)
-    if data is None:
-        return 0
     if (len(data)==expect):
         return data
     left=expect-len(data)
@@ -44,8 +42,6 @@ def start_tcp_server(ip, port):
     try:
         while True:
             meta_data = read_data(client, META_LEN)
-            if meta_data==0:
-                continue
             len = int(str(meta_data.decode()))
             payload = read_data(client, len)
             print(str(payload.decode()))       

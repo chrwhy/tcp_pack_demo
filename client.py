@@ -13,8 +13,6 @@ def assemble_payload(data):
 
 def read_data(conn, expect):
     data=conn.recv(expect)
-    if data is None:
-        return None
     if (len(data)==expect):
         return data
     left=expect-len(data)
@@ -29,7 +27,8 @@ serverPort = 8080
 clientSocket = socket(AF_INET,SOCK_STREAM)
 clientSocket.connect((serverName,serverPort))
 
-hello='Hello Server'
+hello='Hello Server\n'
+
 payload=assemble_payload(hello)
 clientSocket.send(payload)
 
