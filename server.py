@@ -2,17 +2,18 @@ import socket
 import sys
 from left_pad import left_pad
 import time
+import struct
 
 META_LEN=4
 
 def assemble_meta(data):
     data_len=len(data.encode())
-    meta=str(left_pad(str(data_len), META_LEN-len(str(data_len)), '0'))
+    meta=struct.pack('!i', data_len)
     return meta
 
 def assemble_payload(data):
     meta=assemble_meta(data)
-    return meta.encode()+data.encode()
+    return meta+data.encode()
 
 def read_data(client, expect):
     data=client.recv(expect)
@@ -42,12 +43,13 @@ def start_tcp_server(ip, port):
     try:
         while True:
             meta_data = read_data(client, META_LEN)
-            len = int(str(meta_data.decode()))
-            payload = read_data(client, len)
+            payload_len, = struct.unpack('!i', meta_data)
+            payload = read_data(client, payload_len)
             print(str(payload.decode()))       
             ack = assemble_payload('ACK')
             client.send(ack)
     except:
+        print(sys.exc_info()[0])
         continue
 
 if __name__ == '__main__':

@@ -1,15 +1,16 @@
 from socket import *
 from left_pad import left_pad
 import time
+import struct
 
 def assemble_meta(data):
     data_len=len(data.encode())
-    meta=str(left_pad(str(data_len), META_LEN-len(str(data_len)), '0'))
+    meta=struct.pack('!i', data_len)
     return meta
 
 def assemble_payload(data):
     meta=assemble_meta(data)
-    return meta.encode()+data.encode() 
+    return meta+data.encode() 
 
 def read_data(conn, expect):
     data=conn.recv(expect)
@@ -38,15 +39,12 @@ while (True):
     f = open('auto_test.txt','r', encoding='utf-8') 
     for line in f.readlines():        
         print(line)
-
         payload=assemble_payload(line)
         clientSocket.send(payload)
-
         meta_data = read_data(clientSocket, META_LEN)
         if meta_data is None:
            continue
-
-        payload_len = int(meta_data.decode())
+        payload_len, = struct.unpack('!i',meta_data)
         payload = read_data(clientSocket, payload_len)
         print('From server: ' + payload.decode())
         time.sleep(2)
